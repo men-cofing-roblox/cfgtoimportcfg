@@ -1,0 +1,250 @@
+<!very vibecoded but idc>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>menhub cfg encoder</title>
+  <style>
+    :root {
+      --bg-color: #0b0b0d;
+      --card-bg: #16161a;
+      --accent-red: #ff2a2a;
+      --accent-hover: #d61f1f;
+      --text-main: #f0f0f0;
+      --text-muted: #8a8a93;
+      --border-color: #2a2a32;
+      --success-green: #28a745;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(255, 42, 42, 0.1);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    header h1 span {
+      color: var(--accent-red);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 12px;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-red);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      text-transform: uppercase;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-encode {
+      background-color: var(--accent-red);
+      color: #ffffff;
+    }
+
+    .btn-encode:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-decode {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-decode:hover {
+      background-color: var(--border-color);
+    }
+
+    /* Bottom-left notification styling */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: var(--card-bg);
+      color: var(--text-main);
+      padding: 12px 20px;
+      border-radius: 8px;
+      border-left: 4px solid var(--success-green);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      border-left-color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>menhub <span>cfg encoder</span></h1>
+      <p>Data & text conversion tool</p>
+    </header>
+
+    <div class="field-group">
+      <label for="inputText">Input</label>
+      <textarea id="inputText" placeholder="Paste your text or config data here..."></textarea>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-encode" onclick="encodeData()">Encode</button>
+      <button class="btn-decode" onclick="decodeData()">Decode</button>
+    </div>
+
+    <div class="field-group">
+      <label for="outputText">Output</label>
+      <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Action completed successfully</div>
+
+  <script>
+    let toastTimeout;
+
+    function showNotification(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      
+      if (isError) {
+        toast.classList.add('error');
+      } else {
+        toast.classList.remove('error');
+      }
+
+      toast.classList.add('show');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function encodeData() {
+      const input = document.getElementById('inputText').value;
+      if (!input) {
+        showNotification('Please enter input text to encode', true);
+        return;
+      }
+      try {
+        const encoded = btoa(input);
+        document.getElementById('outputText').value = encoded;
+        showNotification('Successfully encoded data!');
+      } catch (e) {
+        showNotification('Error encoding data', true);
+      }
+    }
+
+    function decodeData() {
+      const input = document.getElementById('inputText').value;
+      if (!input) {
+        showNotification('Please enter input text to decode', true);
+        return;
+      }
+      try {
+        const decoded = atob(input);
+        document.getElementById('outputText').value = decoded;
+        showNotification('Successfully decoded data!');
+      } catch (e) {
+        showNotification('Failed to decode: Invalid format', true);
+      }
+    }
+  </script>
+
+</body>
+</html>
